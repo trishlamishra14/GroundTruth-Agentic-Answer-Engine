@@ -25,7 +25,9 @@ class Settings(BaseSettings):
     rerank_top_n: int = 4     # passages kept after reranking
 
     # --- Agent / abstention ---
-    abstain_threshold: float = 0.15   # min rerank score to trust the top passage
+    abstain_threshold: float = 0.30   # data-calibrated: midpoint of a clean gap
+    #                                   (out-of-scope max ~0.10 vs in-scope min ~0.50);
+    #                                   see `python -m eval.calibrate`
     max_agent_loops: int = 2          # how many times the agent may rewrite + retry
     use_langgraph: bool = False       # True -> run the LangGraph version of the agent
 

@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GroundTruth — Agentic Answer Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#e9edf8; --ink:#0d1324; --ink2:#3c4865; --dim:#67738f;
+    --line:rgba(15,23,42,.14); --line2:rgba(15,23,42,.24);
+    --card:#ffffff; --soft:#f3f5fc;
+    --indigo:#5b46f5; --violet:#9333ea; --cyan:#0891b2;
+    --good:#059669; --good-bg:#d8f5e9; --warn:#d97706; --warn-bg:#fcebcf; --bad:#dc2626;
+    --r:18px; --r-sm:12px;
+    --shadow:0 16px 42px rgba(28,38,92,.18); --shadow-sm:0 6px 18px rgba(28,38,92,.12);
+    --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+    --grad:linear-gradient(95deg,#5b46f5,#9333ea 46%,#0891b2);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{font-family:Inter,system-ui,Segoe UI,sans-serif;color:var(--ink);background:var(--bg);
+    -webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit}
+  .blob{position:fixed;filter:blur(85px);opacity:.30;z-index:0;border-radius:50%;animation:float 22s ease-in-out infinite;pointer-events:none}
+  .b1{width:520px;height:520px;background:#c4b5fd;top:-180px;left:-140px}
+  .b2{width:460px;height:460px;background:#a5f3ef;bottom:-200px;right:-150px;animation-delay:-8s}
+  .b3{width:380px;height:380px;background:#bfdbfe;top:42%;left:58%;opacity:.22;animation-delay:-14s}
+  @keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(36px,-44px) scale(1.1)}}
+
+  .top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:13px;padding:14px 26px;
+    background:rgba(243,245,252,.78);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .logo{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--grad);box-shadow:var(--shadow-sm)}
+  .logo svg{width:21px;height:21px}
+  .brand b{font-size:18px;font-weight:800;letter-spacing:-.02em}
+  .brand b .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand span{display:block;font-size:11.5px;color:var(--ink2);margin-top:1px}
+  .top .sp{flex:1}
+  .status{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink2);padding:6px 12px;
+    border:1px solid var(--line);border-radius:999px;background:var(--card)}
+  .status .dot{width:8px;height:8px;border-radius:50%;background:var(--dim);transition:.3s}
+  .status.up .dot{background:var(--good);box-shadow:0 0 0 4px rgba(16,185,129,.15)}
+  .status.down .dot{background:var(--bad);box-shadow:0 0 0 4px rgba(239,68,68,.15)}
+  .tlink{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink2);text-decoration:none;padding:8px 12px;border-radius:10px;transition:.2s}
+  .tlink:hover{color:var(--ink);background:var(--card)} .tlink svg{width:16px;height:16px}
+
+  .wrap{position:relative;z-index:1;max-width:940px;margin:0 auto;padding:40px 22px 80px}
+
+  /* hero */
+  .hero{text-align:center;margin-bottom:30px}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#5b46d6;font-weight:600;
+    background:#efeafe;border:1px solid #ddd3fb;padding:6px 13px;border-radius:999px;margin-bottom:16px}
+  .pill .pd{width:7px;height:7px;border-radius:50%;background:var(--indigo);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  h1{font-size:44px;line-height:1.08;font-weight:900;letter-spacing:-.03em;margin:0 0 14px}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--ink2);font-size:16.5px;line-height:1.6;max-width:60ch;margin:0 auto 26px}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 auto 8px;max-width:760px}
+  @media(max-width:620px){.stats{grid-template-columns:repeat(2,1fr)}h1{font-size:34px}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 14px;box-shadow:var(--shadow-sm);
+    transition:transform .25s,box-shadow .25s}
+  .stat:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+  .stat .v{font-size:30px;font-weight:800;letter-spacing:-.02em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+  .stat .k{font-size:12px;color:var(--ink2);margin-top:5px;font-weight:500}
+
+  /* ask */
+  .ask{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:9px 9px 9px 18px;
+    display:flex;gap:10px;align-items:center;box-shadow:var(--shadow);transition:.25s;margin-top:30px}
+  .ask:focus-within{border-color:#b9aefc;box-shadow:0 0 0 4px rgba(109,94,252,.13),var(--shadow)}
+  .ask svg.s{width:19px;height:19px;color:var(--dim);flex:none}
+  .ask input{flex:1;background:transparent;border:0;outline:0;color:var(--ink);font-size:16px;font-family:inherit}
+  .ask input::placeholder{color:#9aa3bb}
+  .btn{border:0;cursor:pointer;font-family:inherit;font-weight:600;font-size:15px;color:#fff;padding:12px 22px;border-radius:12px;
+    background:var(--grad);background-size:160% 100%;transition:transform .12s,background-position .4s;display:inline-flex;align-items:center;gap:7px;box-shadow:var(--shadow-sm)}
+  .btn:hover{background-position:100% 0} .btn:active{transform:scale(.97)} .btn:disabled{opacity:.55;cursor:not-allowed}
+  .btn svg{width:16px;height:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 2px 0;justify-content:center}
+  .chip{font-size:12.5px;color:var(--ink2);background:var(--card);border:1px solid var(--line);padding:7px 13px;border-radius:999px;cursor:pointer;transition:.2s}
+  .chip:hover{color:var(--ink);border-color:#b9aefc;background:#f4f1ff}
+  .chip.oos::before{content:"✦ ";color:var(--warn)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-sm)}
+  .pad{padding:20px 22px}
+  .rise{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .label{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink2);font-weight:700}
+
+  #result{margin-top:22px;display:none}
+  .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);padding:0 8px}
+  .tab{appearance:none;background:0;border:0;cursor:pointer;font-family:inherit;color:var(--ink2);font-size:13.5px;font-weight:600;padding:14px 15px;position:relative;transition:.2s}
+  .tab:hover{color:var(--ink)} .tab.on{color:#5b46d6}
+  .tab .ct{font-size:11px;color:var(--dim);margin-left:5px}
+  .tab.on::after{content:"";position:absolute;left:11px;right:11px;bottom:-1px;height:2.5px;border-radius:3px;background:var(--grad)}
+  .tabbody{padding:20px 22px}.hidden{display:none}
+  .top-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .badge{font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;display:inline-flex;gap:6px;align-items:center}
+  .badge .dot{width:7px;height:7px;border-radius:50%}
+  .badge.good{color:#0a7a5a;background:var(--good-bg);border:1px solid #bdeddc}.badge.good .dot{background:var(--good)}
+  .badge.warn{color:#9a6206;background:var(--warn-bg);border:1px solid #f6dcae}.badge.warn .dot{background:var(--warn)}
+  .iconbtn{appearance:none;background:var(--soft);border:1px solid var(--line);color:var(--ink2);cursor:pointer;border-radius:9px;padding:7px 11px;font-size:12px;font-family:inherit;display:inline-flex;gap:6px;align-items:center;transition:.2s}
+  .iconbtn:hover{color:var(--ink);border-color:var(--line2)} .iconbtn svg{width:14px;height:14px}
+
+  .answer{font-size:16.5px;line-height:1.75;color:#1a2238}
+  .answer .w{opacity:0;display:inline-block;animation:wIn .4s forwards}
+  @keyframes wIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .cite{color:#5b46d6;font-weight:700;cursor:pointer;border-bottom:1px dotted #b6a9f7}
+
+  .src{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:10px;transition:.25s;background:var(--soft)}
+  .src.hot{border-color:#b9aefc;background:#f3f0ff;box-shadow:0 0 0 3px rgba(109,94,252,.12)}
+  .src .rank{flex:none;width:25px;height:25px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:700;background:#ece8fe;color:#5b46d6}
+  .src .body{flex:1;min-width:0}
+  .src .doc{font-size:13px;font-weight:700;color:#2a3147;display:flex;justify-content:space-between;gap:8px}
+  .src .score{font-size:11px;color:var(--ink2);font-family:var(--mono);font-weight:500}
+  .src .snip{font-size:13px;color:var(--ink2);margin-top:4px;line-height:1.55}
+  .bar{height:6px;border-radius:999px;background:#eceef6;margin-top:9px;overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;border-radius:999px;background:var(--grad);transition:width 1s cubic-bezier(.2,.7,.2,1)}
+
+  .trace{list-style:none;margin:0;padding:0}
+  .trace li{display:flex;gap:13px;align-items:flex-start;font-size:13.5px;color:#3a4259;padding:0 0 16px;position:relative;opacity:0;animation:rise .4s forwards}
+  .trace li:not(:last-child)::before{content:"";position:absolute;left:6px;top:15px;bottom:-2px;width:2px;background:var(--line2)}
+  .trace .tdot{margin-top:3px;width:13px;height:13px;border-radius:50%;flex:none;z-index:1;background:var(--grad);box-shadow:0 0 0 4px rgba(109,94,252,.12)}
+  .trace code{font-family:var(--mono);font-size:12px;color:#5b46d6}
+  pre.json{font-family:var(--mono);font-size:12.5px;line-height:1.6;color:#39425c;background:var(--soft);border:1px solid var(--line);border-radius:var(--r-sm);padding:15px;overflow:auto;margin:0;white-space:pre-wrap;word-break:break-word}
+
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+  @media(max-width:620px){.metrics{grid-template-columns:repeat(2,1fr)}}
+  .metric{background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px 16px;box-shadow:var(--shadow-sm)}
+  .metric .k{font-size:10.5px;color:var(--ink2);text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+  .metric .v{font-size:22px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+  .metric .v small{font-size:12px;color:var(--ink2);font-weight:500}
+
+  .stage{display:flex;align-items:center;gap:11px;color:var(--ink2);font-size:14px;margin-bottom:14px}
+  .spin{width:17px;height:17px;border-radius:50%;border:2.5px solid #e3e6f2;border-top-color:var(--indigo);animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .sk{height:13px;border-radius:7px;margin:11px 0;background:linear-gradient(90deg,#eef0f8,#e2e6f4,#eef0f8);background-size:200% 100%;animation:sh 1.2s infinite}
+  @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  .err{color:#b42318;background:#fef2f1;border-color:#f6cfc9}
+
+  /* how it works */
+  .section{margin-top:54px}
+  .sec-head{text-align:center;margin-bottom:26px}
+  .sec-head h2{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:0 0 8px}
+  .sec-head p{color:var(--ink2);font-size:15px;margin:0;max-width:54ch;margin-inline:auto;line-height:1.6}
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;justify-content:center}
+  .step{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow-sm);position:relative;transition:transform .25s,box-shadow .25s}
+  .step:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+  .step+.step{margin-left:16px}
+  @media(max-width:760px){.step+.step{margin-left:0;margin-top:14px}.flow{flex-direction:column}}
+  .step .ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:#f1eefe;color:#5b46d6;margin-bottom:12px}
+  .step .ico svg{width:21px;height:21px}
+  .step .n{position:absolute;top:14px;right:16px;font-size:12px;font-weight:800;color:#cdd2e4;font-family:var(--mono)}
+  .step h4{margin:0 0 5px;font-size:15px;font-weight:700}
+  .step p{margin:0;font-size:13px;color:var(--ink2);line-height:1.55}
+  .step .tech{margin-top:10px;font-size:11px;font-family:var(--mono);color:#5b46d6;background:#f3f0ff;border:1px solid #e6e0fc;padding:3px 8px;border-radius:7px;display:inline-block}
+  .arrow{display:flex;align-items:center;color:#c3c9de;flex:none}
+  .arrow svg{width:24px;height:24px}
+  @media(max-width:760px){.arrow{transform:rotate(90deg);margin:2px auto}}
+
+  .why{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+  @media(max-width:680px){.why{grid-template-columns:1fr}}
+  .wcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow-sm)}
+  .wcard .wi{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;margin-bottom:11px}
+  .wcard.g .wi{background:var(--good-bg);color:#0a7a5a}.wcard.w .wi{background:var(--warn-bg);color:#9a6206}.wcard.b .wi{background:#eaf3ff;color:#1d6fd6}
+  .wcard .wi svg{width:19px;height:19px}
+  .wcard h4{margin:0 0 5px;font-size:14.5px;font-weight:700}
+  .wcard p{margin:0;font-size:13px;color:var(--ink2);line-height:1.55}
+
+  footer{margin-top:50px;text-align:center;color:var(--dim);font-size:12.5px}
+  footer a{color:#5b46d6;text-decoration:none}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  .hist{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;justify-content:center}
+  .hi{appearance:none;cursor:pointer;font-family:inherit;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:12.5px;color:var(--ink);display:inline-flex;gap:7px;align-items:center;transition:.2s}
+  .hi:hover{border-color:var(--line2)} .hi .hd{width:7px;height:7px;border-radius:50%}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<h2 class="sr-only">GroundTruth — an agentic answer engine that retrieves, cites, and abstains, with live metrics, benchmark scores, and an explainer of how it works.</h2>
+
+<div class="top">
+  <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+  <div class="brand"><b>Ground<span class="g">Truth</span></b><span>Agentic answer engine · cited · evaluated</span></div>
+  <div class="sp"></div>
+  <div class="status" id="status"><span class="dot"></span><span id="statusText">checking…</span></div>
+  <a class="tlink" href="/docs" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>API</a>
+  <a class="tlink" href="https://github.com/trishlamishra14/GroundTruth-Agentic-Answer-Engine" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.6 2 12.3c0 4.5 2.9 8.3 6.8 9.7.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.4-3.4-1.4-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.3 1.1 2.9.8.1-.7.3-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.3 9.3 0 015 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5 3.9-1.4 6.8-5.2 6.8-9.7C22 6.6 17.5 2 12 2z"/></svg>GitHub</a>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="pill"><span class="pd"></span>Agentic RAG · grounded &amp; evaluated</div>
+    <h1>Answers you can <span class="g">trust</span>.</h1>
+    <p class="sub">GroundTruth retrieves the right passages, re-ranks them, answers <b>with citations</b>, and <b>abstains</b> when the docs don't cover your question — instead of hallucinating. Every answer is timed, costed, and benchmarked.</p>
+    <div class="stats" id="stats">
+      <div class="stat"><div class="v" data-stat="retrieval_recall">—</div><div class="k">Retrieval recall</div></div>
+      <div class="stat"><div class="v" data-stat="abstention_accuracy">—</div><div class="k">Abstention accuracy</div></div>
+      <div class="stat"><div class="v" data-stat="faithfulness">—</div><div class="k">Faithfulness</div></div>
+      <div class="stat"><div class="v" data-stat="cost">—</div><div class="k">Cost / query</div></div>
+    </div>
+  </div>
+
+  <form class="ask" id="form" autocomplete="off">
+    <svg class="s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input id="q" placeholder="Ask about LLMs, RAG, embeddings, agents… e.g. What is retrieval-augmented generation?" />
+    <button class="btn" id="go" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Ask</button>
+  </form>
+  <div class="chips" id="chips"></div>
+  <div class="hist" id="hist"></div>
+
+  <div id="result"></div>
+
+  <div class="section">
+    <div class="sec-head"><h2>How it works</h2><p>A small agent — not a one-shot pipeline. It grades its own retrieval, retries weak queries, and refuses when the answer isn't in the docs.</p></div>
+    <div class="flow" id="flow">
+      <div class="step"><span class="n">01</span><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><h4>Retrieve</h4><p>Hybrid search — vector similarity plus keyword matching — fused with Reciprocal Rank Fusion.</p><span class="tech">pgvector + BM25 + RRF</span></div>
+      <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="step"><span class="n">02</span><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></div><h4>Re-rank</h4><p>A cross-encoder reads the question and each passage together to score true relevance.</p><span class="tech">Cohere Rerank</span></div>
+      <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="step"><span class="n">03</span><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3 8-8"/><path d="M21 12a9 9 0 11-6.2-8.5"/></svg></div><h4>Grade &amp; loop</h4><p>Strong enough? Answer. Too weak? The agent rewrites the query and retries.</p><span class="tech">LangGraph agent</span></div>
+      <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="step"><span class="n">04</span><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><h4>Answer or abstain</h4><p>Writes a cited answer from the sources — or says "not in the docs" rather than guess.</p><span class="tech">Cohere Command</span></div>
+    </div>
+
+    <div class="why">
+      <div class="wcard g"><div class="wi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div><h4>Grounded</h4><p>Every claim is backed by a retrieved passage, cited inline as [1], [2] — traceable, not invented.</p></div>
+      <div class="wcard w"><div class="wi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div><h4>Abstains</h4><p>If the docs don't support an answer, it refuses — the single biggest defense against hallucination.</p></div>
+      <div class="wcard b"><div class="wi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div><h4>Evaluated</h4><p>A gold benchmark scores recall, faithfulness, and abstention in CI — quality is measured, not assumed.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-head"><h2>Why it matters</h2><p>A confident wrong answer is worse than no answer — it erodes trust and creates cleanup work. GroundTruth refuses to guess, shows its sources, and proves its quality with a benchmark.</p></div>
+    <div class="why">
+      <div class="wcard b"><div class="wi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div><h4>Docs &amp; knowledge Q&amp;A</h4><p>Answer questions over engineering docs, SOPs, and policies — with the exact source passages attached, so answers are verifiable.</p></div>
+      <div class="wcard g"><div class="wi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h4>Support you can trust</h4><p>Help-center and internal assistants where a hallucinated answer costs real trust, support time, and sometimes compliance.</p></div>
+      <div class="wcard w"><div class="wi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.79-.84.78-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 014-9 11.5 11.5 0 018 8 22 22 0 01-9 4z"/></svg></div><h4>RAG that ships</h4><p>Grounding, abstention, and measured quality — the bar a retrieval feature has to clear before it can go to production.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="card pad" style="display:flex;gap:18px;align-items:flex-start;max-width:780px;margin:0 auto">
+      <div style="width:54px;height:54px;border-radius:14px;flex:none;display:grid;place-items:center;background:var(--grad);color:#fff;font-weight:800;font-size:18px;box-shadow:var(--shadow-sm)">TM</div>
+      <div>
+        <div class="label" style="margin-bottom:9px">Why I built it</div>
+        <p style="font-size:16px;line-height:1.72;color:#1a2238;margin:0 0 12px">I build document-AI systems for a US-healthcare product, where a wrong answer isn&#39;t an option. I built GroundTruth to take that discipline — grounding, abstention, and real evaluation — and show it end to end as a clean, deployable service: an agent that retrieves, reasons, cites, and refuses, with a benchmark that runs in CI. Most RAG demos are a notebook; I wanted to build the version you&#39;d actually put in production.</p>
+        <div style="font-size:13.5px;color:var(--ink2)"><b style="color:var(--ink)">Trishla Mishra</b> · Applied AI Engineer</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Built with Cohere + pgvector · LangGraph agent · <a href="/docs">API</a> · <a href="/metrics">metrics</a> · <a href="https://github.com/trishlamishra14/GroundTruth-Agentic-Answer-Engine">source</a></footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const state={history:[]};
+const samples=[
+  {q:"What is retrieval-augmented generation?"},
+  {q:"Which measure is used to compare embeddings?"},
+  {q:"What does reranking do in vector search?"},
+  {q:"What is the capital of Australia?",oos:true}
+];
+const chips=$('#chips');
+samples.forEach(s=>{const c=document.createElement('div');c.className='chip'+(s.oos?' oos':'');c.textContent=s.q;c.onclick=()=>{$('#q').value=s.q;submit();};chips.appendChild(c);});
+$('#form').addEventListener('submit',e=>{e.preventDefault();submit();});
+
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function citeHtml(t){return esc(t).replace(/\[(\d+(?:\s*,\s*\d+)*)\]/g,'<span class="cite" data-cite="$1">[$1]</span>');}
+
+async function health(){const el=$('#status');try{const r=await fetch('/health');if(!r.ok)throw 0;el.className='status up';$('#statusText').textContent='API online';}catch{el.className='status down';$('#statusText').textContent='API offline';}}
+health();setInterval(health,15000);
+
+function countUp(el,to,suffix,dec){let t0=null;const dur=900;function step(ts){t0=t0||ts;const p=Math.min(1,(ts-t0)/dur);const e=1-Math.pow(1-p,3);el.textContent=(to*e).toFixed(dec)+suffix;if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+
+async function loadReport(){try{const d=await(await fetch('/report')).json();if(!d||!Object.keys(d).length)return;
+  const set=(k,to,suf,dec)=>{const el=document.querySelector(`[data-stat="${k}"]`);if(el)countUp(el,to,suf,dec);};
+  set('retrieval_recall',d.retrieval_recall*100,'%',0);
+  set('abstention_accuracy',d.abstention_accuracy*100,'%',0);
+  set('faithfulness',d.faithfulness*100,'%',0);
+  const c=document.querySelector('[data-stat="cost"]');if(c)c.textContent='$'+Number(d.avg_cost_usd).toFixed(4);
+}catch{}}
+loadReport();
+
+const STAGES=['Embedding your question…','Searching the vector store…','Re-ranking passages…','Reasoning over sources…'];
+let stageTimer=null;
+async function submit(){
+  const q=$('#q').value.trim();if(!q)return;
+  $('#go').disabled=true;const res=$('#result');res.style.display='block';res.innerHTML=loading();
+  let i=0;stageTimer=setInterval(()=>{const el=$('#stageText');if(el)el.textContent=STAGES[i++%STAGES.length];},1400);
+  const t0=performance.now();
+  try{
+    const r=await fetch('/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();clearInterval(stageTimer);
+    render(data,Math.round(performance.now()-t0));
+    state.history.unshift({q,data});renderHistory();
+  }catch(err){clearInterval(stageTimer);res.innerHTML=`<div class="card err pad rise"><b>Request failed.</b> ${esc(err.message)}. Check that the API and database are running.</div>`;}
+  finally{$('#go').disabled=false;res.scrollIntoView({behavior:'smooth',block:'nearest'});}
+}
+function loading(){return `<div class="card rise pad"><div class="stage"><div class="spin"></div><span id="stageText">Embedding your question…</span></div><div class="sk" style="width:94%"></div><div class="sk" style="width:80%"></div><div class="sk" style="width:88%"></div></div>`;}
+
+function render(d,clientMs){
+  const badge=d.grounded?`<span class="badge good"><span class="dot"></span>Grounded · cited</span>`:`<span class="badge warn"><span class="dot"></span>Abstained · not in docs</span>`;
+  const words=d.answer.split(/(\s+)/).map((w,i)=>w.trim()===''?w:`<span class="w" style="animation-delay:${i*20}ms">${citeHtml(w)}</span>`).join('');
+  const nSrc=(d.sources||[]).length,nTr=(d.trace||[]).length;
+  const sources=(d.sources||[]).map(s=>`<div class="src" id="src-${s.rank}"><div class="rank">${s.rank}</div><div class="body"><div class="doc"><span>${esc(s.doc)}</span><span class="score">rerank ${Number(s.score).toFixed(2)}</span></div><div class="bar"><i data-w="${Math.round(s.score*100)}"></i></div><div class="snip">${esc(s.snippet)}</div></div></div>`).join('')||`<div style="color:var(--ink2);font-size:13px">No sources — the answer was an abstention.</div>`;
+  const trace=(d.trace||[]).map((t,i)=>`<li style="animation-delay:${i*90}ms"><span class="tdot"></span><span>${citeHtml(t)}</span></li>`).join('');
+  $('#result').innerHTML=`
+    <div class="card rise">
+      <div class="tabs">
+        <button class="tab on" data-tab="answer">Answer</button>
+        <button class="tab" data-tab="sources">Sources<span class="ct">${nSrc}</span></button>
+        <button class="tab" data-tab="trace">Trace<span class="ct">${nTr}</span></button>
+        <button class="tab" data-tab="json">JSON</button>
+      </div>
+      <div class="tabbody" data-body="answer">
+        <div class="top-row">${badge}<button class="iconbtn" id="copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>Copy</button></div>
+        <div class="answer" id="ans">${words}</div>
+      </div>
+      <div class="tabbody hidden" data-body="sources">${sources}</div>
+      <div class="tabbody hidden" data-body="trace"><ul class="trace">${trace}</ul></div>
+      <div class="tabbody hidden" data-body="json"><pre class="json">${esc(JSON.stringify(d,null,2))}</pre></div>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="k">Latency</div><div class="v">${Math.round(d.latency_ms)}<small> ms</small></div></div>
+      <div class="metric"><div class="k">Est. cost</div><div class="v">$${Number(d.est_cost_usd).toFixed(5)}</div></div>
+      <div class="metric"><div class="k">Agent loops</div><div class="v">${d.loops}</div></div>
+      <div class="metric"><div class="k">Round trip</div><div class="v">${clientMs}<small> ms</small></div></div>
+    </div>`;
+  requestAnimationFrame(()=>document.querySelectorAll('.bar>i').forEach(b=>b.style.width=b.dataset.w+'%'));
+  wire();
+}
+function wire(){
+  document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));const n=t.dataset.tab;document.querySelectorAll('[data-body]').forEach(b=>b.classList.toggle('hidden',b.dataset.body!==n));});
+  const copy=$('#copy');if(copy)copy.onclick=()=>{navigator.clipboard?.writeText($('#ans').innerText);copy.innerHTML='✓ Copied';setTimeout(()=>copy.innerHTML='Copy',1300);};
+  document.querySelectorAll('.cite').forEach(c=>c.onclick=()=>{document.querySelector('[data-tab="sources"]').click();const n=(c.dataset.cite||'').split(',')[0].trim();const el=$('#src-'+n);if(el){el.classList.add('hot');el.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>el.classList.remove('hot'),1600);}});
+}
+function renderHistory(){const h=$('#hist');h.innerHTML=state.history.slice(0,6).map((it,i)=>`<button class="hi" data-i="${i}"><span class="hd" style="background:${it.data.grounded?'var(--good)':'var(--warn)'}"></span>${esc(it.q.length>42?it.q.slice(0,42)+'…':it.q)}</button>`).join('');
+  h.querySelectorAll('.hi').forEach(b=>b.onclick=()=>{const it=state.history[+b.dataset.i];$('#q').value=it.q;$('#result').style.display='block';render(it.data,0);});}
+</script>
+</body>
+</html>

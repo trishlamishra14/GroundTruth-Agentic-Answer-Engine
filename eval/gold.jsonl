@@ -1,0 +1,45 @@
+{"question": "What is a token in a large language model?", "expected_doc": "llms.md", "reference": "A chunk of text, on average about four characters or three quarters of a word.", "out_of_scope": false}
+{"question": "What does temperature control when generating text?", "expected_doc": "llms.md", "reference": "Randomness: 0 is focused and deterministic, higher is more diverse.", "out_of_scope": false}
+{"question": "What is hallucination in an LLM?", "expected_doc": "llms.md", "reference": "Fluent, plausible text that is factually wrong or unsupported.", "out_of_scope": false}
+{"question": "What is an embedding?", "expected_doc": "embeddings.md", "reference": "A vector of numbers representing the meaning of text.", "out_of_scope": false}
+{"question": "Which measure is commonly used to compare two embeddings?", "expected_doc": "embeddings.md", "reference": "Cosine similarity, ranging from -1 to 1.", "out_of_scope": false}
+{"question": "What is retrieval-augmented generation?", "expected_doc": "rag.md", "reference": "Retrieving relevant documents first, then answering using them.", "out_of_scope": false}
+{"question": "Why does RAG reduce hallucination?", "expected_doc": "rag.md", "reference": "It grounds the answer in real retrieved sources instead of the model's memory.", "out_of_scope": false}
+{"question": "What is hybrid search?", "expected_doc": "vector_search.md", "reference": "Combining vector (semantic) search with keyword (lexical) search.", "out_of_scope": false}
+{"question": "What does reranking do?", "expected_doc": "vector_search.md", "reference": "A cross-encoder reorders candidates by true relevance.", "out_of_scope": false}
+{"question": "What is a system prompt?", "expected_doc": "prompting.md", "reference": "A prompt that sets the model's role and behaviour.", "out_of_scope": false}
+{"question": "What is chain-of-thought prompting?", "expected_doc": "prompting.md", "reference": "Asking the model to reason step by step before answering.", "out_of_scope": false}
+{"question": "What is tool calling in an AI agent?", "expected_doc": "agents.md", "reference": "Letting the model invoke functions such as search or a calculator.", "out_of_scope": false}
+{"question": "What does LangGraph do?", "expected_doc": "agents.md", "reference": "Models an agent as a stateful graph with conditional branching and retries.", "out_of_scope": false}
+{"question": "What is self-attention in a transformer?", "expected_doc": "transformers.md", "reference": "It lets every token attend to every other token to weigh what matters.", "out_of_scope": false}
+{"question": "Are most modern LLMs encoder-only or decoder-only?", "expected_doc": "transformers.md", "reference": "Most modern LLMs are decoder-only transformers.", "out_of_scope": false}
+{"question": "What do positional encodings provide?", "expected_doc": "transformers.md", "reference": "Information about token order, which attention lacks on its own.", "out_of_scope": false}
+{"question": "What is multi-head attention?", "expected_doc": "transformers.md", "reference": "Running several attention operations in parallel to capture different relationships.", "out_of_scope": false}
+{"question": "What is LoRA?", "expected_doc": "fine_tuning.md", "reference": "Low-Rank Adaptation trains a few extra parameters instead of all weights, making fine-tuning cheaper.", "out_of_scope": false}
+{"question": "When should you use RAG instead of fine-tuning?", "expected_doc": "fine_tuning.md", "reference": "When facts change often; RAG adds knowledge at query time.", "out_of_scope": false}
+{"question": "What does fine-tuning do to a model?", "expected_doc": "fine_tuning.md", "reference": "Adapts a pretrained model to a task or domain by training on examples.", "out_of_scope": false}
+{"question": "What is faithfulness in LLM evaluation?", "expected_doc": "evaluation.md", "reference": "Whether an answer is fully supported by the provided context.", "out_of_scope": false}
+{"question": "What is Ragas?", "expected_doc": "evaluation.md", "reference": "A framework for evaluating RAG on faithfulness, answer relevance, and context precision.", "out_of_scope": false}
+{"question": "What is an LLM-as-judge?", "expected_doc": "evaluation.md", "reference": "Using a model to grade outputs, though the judge has its own error rate.", "out_of_scope": false}
+{"question": "What is regression testing for an LLM system?", "expected_doc": "evaluation.md", "reference": "Re-running a benchmark to catch quality drops before shipping.", "out_of_scope": false}
+{"question": "What is prompt injection?", "expected_doc": "safety.md", "reference": "An attack where input text tries to override the system instructions.", "out_of_scope": false}
+{"question": "What are guardrails?", "expected_doc": "safety.md", "reference": "Checks that filter or constrain a model's inputs and outputs.", "out_of_scope": false}
+{"question": "Why is abstention considered a safety behaviour?", "expected_doc": "safety.md", "reference": "A wrong answer is often worse than no answer, so refusing when unsure is safer.", "out_of_scope": false}
+{"question": "What is HyDE in retrieval?", "expected_doc": "advanced_rag.md", "reference": "Hypothetical Document Embeddings: generate a hypothetical answer and embed it to improve retrieval.", "out_of_scope": false}
+{"question": "What is top-k retrieval?", "expected_doc": "advanced_rag.md", "reference": "Selecting the k most relevant chunks to place in the prompt.", "out_of_scope": false}
+{"question": "What is query rewriting?", "expected_doc": "advanced_rag.md", "reference": "Reformulating a weak query so it retrieves better passages.", "out_of_scope": false}
+{"question": "What is GraphRAG?", "expected_doc": "advanced_rag.md", "reference": "Building a knowledge graph over documents to answer multi-hop questions.", "out_of_scope": false}
+{"question": "How can retrieval act as long-term memory?", "expected_doc": "context_and_memory.md", "reference": "By fetching relevant past information on demand instead of keeping it all in context.", "out_of_scope": false}
+{"question": "How does summarization help with long conversations?", "expected_doc": "context_and_memory.md", "reference": "It compresses a long history so it still fits inside the context window.", "out_of_scope": false}
+{"question": "What is the capital of Australia?", "expected_doc": null, "reference": "Not covered by the knowledge base.", "out_of_scope": true}
+{"question": "Who won the 2022 FIFA World Cup?", "expected_doc": null, "reference": "Not covered by the knowledge base.", "out_of_scope": true}
+{"question": "What is the boiling point of water in Celsius?", "expected_doc": null, "reference": "Not covered by the knowledge base.", "out_of_scope": true}
+{"question": "What medication should I take for a fever?", "expected_doc": null, "reference": "Not covered by the knowledge base.", "out_of_scope": true}
+{"question": "What is Apple's current stock price?", "expected_doc": null, "reference": "Not covered by the knowledge base.", "out_of_scope": true}
+{"question": "Who painted the Mona Lisa?", "expected_doc": null, "reference": "Not covered by the knowledge base.", "out_of_scope": true}
+{"question": "What is the tallest mountain in the world?", "expected_doc": null, "reference": "Not covered by the knowledge base.", "out_of_scope": true}
+{"question": "Who is the CEO of Tesla?", "expected_doc": null, "reference": "Not covered by the knowledge base.", "out_of_scope": true}
+{"question": "How do I bake sourdough bread?", "expected_doc": null, "reference": "Not covered by the knowledge base.", "out_of_scope": true}
+{"question": "What is the exchange rate from euros to dollars?", "expected_doc": null, "reference": "Not covered by the knowledge base.", "out_of_scope": true}
+{"question": "How many days are in February 2024?", "expected_doc": null, "reference": "Not covered by the knowledge base.", "out_of_scope": true}
+{"question": "What time zone is Tokyo in?", "expected_doc": null, "reference": "Not covered by the knowledge base.", "out_of_scope": true}

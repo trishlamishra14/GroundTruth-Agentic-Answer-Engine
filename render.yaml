@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: groundtruth
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: COHERE_API_KEY
+        sync: false        # paste your Cohere key in the Render dashboard
+      - key: DATABASE_URL
+        sync: false        # paste your Neon connection string in the dashboard
+      - key: USE_LANGGRAPH
+        value: "false"

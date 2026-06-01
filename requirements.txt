@@ -1,0 +1,12 @@
+# Core
+fastapi
+uvicorn[standard]
+cohere               # embeddings + chat (Command) + rerank
+psycopg[binary]      # PostgreSQL driver (v3)
+pgvector             # pgvector column type helpers
+python-dotenv
+pydantic
+pydantic-settings
+
+# Agent graph (optional path; set USE_LANGGRAPH=true to use it)
+langgraph

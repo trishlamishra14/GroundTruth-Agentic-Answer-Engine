@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-06-02T01:34:03",
+  "model": "command-r-08-2024",
+  "use_langgraph": false,
+  "n_total": 45,
+  "n_in_scope": 33,
+  "n_out_of_scope": 12,
+  "retrieval_recall": 1.0,
+  "faithfulness": 0.848,
+  "abstention_accuracy": 1.0,
+  "avg_latency_ms": 8412.3,
+  "p95_latency_ms": 19653.8,
+  "avg_cost_usd": 8.9e-05,
+  "thresholds": {
+    "retrieval_recall": 0.75,
+    "faithfulness": 0.75,
+    "abstention_accuracy": 0.8
+  }
+}

@@ -1,0 +1,56 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # Always-on: lint + unit tests (no API key or DB needed).
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check app eval tests
+      - run: pytest -q
+
+  # Regression gate: ingest + evaluate against the gold set.
+  # Runs only if a COHERE_API_KEY secret is configured on the repo.
+  eval:
+    runs-on: ubuntu-latest
+    needs: unit
+    if: ${{ github.event_name == 'push' }}
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: rag
+          POSTGRES_PASSWORD: rag
+          POSTGRES_DB: ragdb
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd "pg_isready -U rag -d ragdb"
+          --health-interval 3s --health-timeout 3s --health-retries 10
+    env:
+      COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+      DATABASE_URL: postgresql://rag:rag@localhost:5432/ragdb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Note
+        run: |
+          if [ -z "$COHERE_API_KEY" ]; then
+            echo "No COHERE_API_KEY secret set - eval steps will be skipped."
+          fi
+      - run: pip install -r requirements.txt
+        if: ${{ env.COHERE_API_KEY != '' }}
+      - run: python -m app.ingest
+        if: ${{ env.COHERE_API_KEY != '' }}
+      - run: python -m eval.run_eval   # exits non-zero if a metric regresses
+        if: ${{ env.COHERE_API_KEY != '' }}

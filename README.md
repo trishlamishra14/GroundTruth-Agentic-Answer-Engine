@@ -1,6 +1,7 @@
 # GroundTruth
 
-An **agentic answer engine** over a documentation corpus. It retrieves, re-ranks, and
+An **agentic answer engine** over an AI / GenAI concepts knowledge base (LLMs, embeddings,
+RAG, vector search, prompting, agents). It retrieves, re-ranks, and
 answers **with inline citations** — it tries harder on weak queries (rewrite + retry) and
 **abstains** ("not in the docs") instead of hallucinating. The headline isn't the chatbot;
 it's the **evaluation + reliability harness** that proves it works.
@@ -60,7 +61,7 @@ python -m eval.run_eval
 Try an in-scope and an out-of-scope question to see grounding vs. abstention:
 
 ```json
-POST /query  {"question": "How do I make a query parameter optional in FastAPI?"}
+POST /query  {"question": "What is retrieval-augmented generation?"}
 POST /query  {"question": "What is the capital of Australia?"}   // -> abstains
 ```
 
@@ -70,18 +71,18 @@ POST /query  {"question": "What is the capital of Australia?"}   // -> abstains
 docker compose up --build       # db + api; then run `python -m app.ingest` once
 ```
 
-## Use the real FastAPI docs (scale up)
+## Use your own documents (scale up)
 
-The repo ships with a small sample corpus so it runs end-to-end out of the box. To point it
-at the full FastAPI documentation:
+The repo ships with a small AI/GenAI knowledge base so it runs end-to-end out of the box. To
+point it at any other corpus, just drop `.md` files into `data/sample_docs/` and re-ingest:
 
 ```bash
-git clone --depth 1 https://github.com/fastapi/fastapi.git
-xcopy fastapi\docs\en\docs data\sample_docs\ /E /I    # mac/linux: cp -r .../docs/* data/sample_docs/
+# add your own .md files to data/sample_docs/, then:
 python -m app.ingest
 ```
 
-Then grow `eval/gold.jsonl` toward ~150 questions (including more out-of-scope cases).
+Then grow `eval/gold.jsonl` toward ~150 questions (including more out-of-scope cases) so the
+benchmark stays meaningful as the corpus grows.
 
 ## Project layout
 
